@@ -21,6 +21,8 @@ class TverskySimilarity(nn.Module):
 
         ab_diff = self.difference(a, b)
         ba_diff = self.difference(b, a).T
+        if ba_diff.shape != ab_diff.shape:
+            ba_diff = ba_diff.permute(1, 2, 0)
         stacked_features = torch.stack((ab_intersec, ab_diff, ba_diff), dim=1) # (B, 3, P)
 
         similarity = torch.matmul(self.constants, stacked_features) # (B, 1, P)
