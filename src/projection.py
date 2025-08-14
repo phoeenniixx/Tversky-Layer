@@ -23,6 +23,18 @@ class TverskyProjection(nn.Module):
                                                        difference_mode=self.difference_mode)
 
     def forward(self, x:torch.Tensor):
-         return self.similarity_calculator(x, self.projections)
+        if x.dim() == 2:
+            output = self.similarity_calculator(x, self.prototypes)
+        elif x.dim() == 3:
+            batch_size, time_steps, input_dim = x.shape
+            x_flat = x.reshape(-1, input_dim)
+            similarity_flat = self.similarity_calculator(x_flat, self.projections)
+            output = similarity_flat.reshape(batch_size, time_steps, self.output_dim)
+        else:
+            raise ValueError(
+                f"TverskyProjection received an unsupported input tensor shape. "
+                f"Expected 2D (batch, features) or 3D (batch, time, features), but got {x.dim()}D."
+            )
+        return output
 
 
