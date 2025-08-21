@@ -2,16 +2,16 @@ import torch
 import torch.nn as nn
 
 class Difference(nn.Module):
-    def __init__(self, feats: torch.Tensor, mode: str = "ignorematch"):
+    def __init__(self, mode: str = "ignorematch"):
         super().__init__()
-        self.feats = feats
+        # self.feats = feats
         self.mode = mode
 
-    def ignorematch(self, a:torch.Tensor, b:torch.Tensor):
+    def ignorematch(self, a:torch.Tensor, b:torch.Tensor, feats:torch.Tensor):
         # (B, D) @ (D, K) -> (B, K)
-        a_fk = torch.matmul(a, self.feats.T)
+        a_fk = torch.matmul(a, feats.T)
         # (P, D) @ (D, K) -> (P, K)
-        b_fk = torch.matmul(b, self.feats.T)
+        b_fk = torch.matmul(b, feats.T)
 
         a_fk = a_fk.unsqueeze(1)  # (B, 1, K)
         b_fk = b_fk.unsqueeze(0)  # (1, P, K)
@@ -20,11 +20,11 @@ class Difference(nn.Module):
         result = torch.sum(a_fk * mask, dim=2)
         return result
 
-    def substractmatch(self, a:torch.Tensor, b:torch.Tensor):
+    def substractmatch(self, a:torch.Tensor, b:torch.Tensor, feats:torch.Tensor):
         # (B, D) @ (D, K) -> (B, K)
-        a_fk = torch.matmul(a, self.feats.T)
+        a_fk = torch.matmul(a, feats.T)
         # (P, D) @ (D, K) -> (P, K)
-        b_fk = torch.matmul(b, self.feats.T)
+        b_fk = torch.matmul(b, feats.T)
 
         a_fk = a_fk.unsqueeze(1)  # (B, 1, K)
         b_fk = b_fk.unsqueeze(0)  # (1, P, K)
@@ -36,11 +36,11 @@ class Difference(nn.Module):
         result = torch.sum(a_masked - b_masked, dim=2)
         return result
 
-    def forward(self, a:torch.Tensor, b:torch.Tensor):
+    def forward(self, a:torch.Tensor, b:torch.Tensor, feats:torch.Tensor):
         if self.mode =="ignorematch":
-            return self.ignorematch(a, b)
+            return self.ignorematch(a, b,feats=feats)
         elif self.mode == "substractmatch":
-            return self.substractmatch(a, b)
+            return self.substractmatch(a, b, feats=feats)
         else:
             raise ValueError(
                 "Invalid method. Choose from 'ignorematch' or 'substractmatch'.")
