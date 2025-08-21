@@ -3,7 +3,7 @@ import torch.nn as nn
 
 from .similarity_layer import TverskySimilarity
 
-class TverskyProjection(nn.Module):
+class ModifiedTverskyProjection(nn.Module):
 
     def __init__(self, input_dim: int, output_dim: int, num_features: int,
                  intersection_mode: str = "product", difference_mode: str = "ignorematch",

@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from .utils import *
+from src.utils import *
 
 class Intersection(nn.Module):
 
