@@ -46,7 +46,8 @@ class TverskyProjection(nn.Module):
 
     def _initialize_weights(self):
         """Initialize with much smaller, more stable weights"""
-        nn.init.normal_(self.features, mean=0, std=self.init_std)
+        nn.init.normal_(self.feature_generator.weight, mean=0, std=self.init_std)
+        nn.init.zeros_(self.feature_generator.bias)
         nn.init.normal_(self.projections, mean=0, std=self.init_std)
 
         with torch.no_grad():
@@ -67,11 +68,11 @@ class TverskyProjection(nn.Module):
         dynamic_features = flat_features.view(self.num_features, self.input_dim) # (K, D)
 
         if x.dim() == 2:
-            output = self.similarity_calculator(x, self.prototypes, feats=dynamic_features)
+            output = self.similarity_calculator(x, self.projections, feats=dynamic_features)
         elif x.dim() == 3:
             batch_size, time_steps, _ = x.shape
             x_flat = x.reshape(-1, self.input_dim)
-            similarity_flat = self.similarity_calculator(x_flat, self.projections, features=dynamic_features)
+            similarity_flat = self.similarity_calculator(x_flat, self.projections, feats=dynamic_features)
             output = similarity_flat.reshape(batch_size, time_steps, self.output_dim)
         else:
             raise ValueError(
