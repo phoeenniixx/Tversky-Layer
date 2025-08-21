@@ -12,15 +12,16 @@ class TverskyProjection(nn.Module):
         super().__init__()
         self.input_dim = input_dim  # D
         self.output_dim = output_dim  # P
-        self.num_features = num_features  # K
+        # self.num_features = num_features  # K
         self.intersection_mode = intersection_mode
         self.difference_mode = difference_mode
         self.output_scale = output_scale
         self.use_batch_norm = use_batch_norm
         self.init_std = init_std
 
-        self.features = nn.Parameter(torch.randn(self.num_features, self.input_dim),
-                                     requires_grad=True)
+        # self.features = nn.Parameter(torch.randn(self.num_features, self.input_dim),
+        #                              requires_grad=True)
+        self.feature_generator = nn.Linear(input_dim, num_features * input_dim)
         self.projections = nn.Parameter(torch.randn(self.output_dim, self.input_dim),
                                         requires_grad=True)
         self.similarity_calculator = TverskySimilarity(self.features,
@@ -37,7 +38,6 @@ class TverskyProjection(nn.Module):
     def _apply_output_normalization(self, output):
         """Apply batch normalization if enabled"""
         if self.output_norm is not None and len(output.shape) == 3:
-            batch_size, seq_len, features = output.shape
             output_reshaped = output.transpose(1, 2)
             output_normed = self.output_norm(output_reshaped)
             output = output_normed.transpose(1, 2)
